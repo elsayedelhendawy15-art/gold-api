@@ -1,0 +1,33 @@
+name: Update Gold Price
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # سيعمل كل 10 دقائق
+  workflow_dispatch: # يسمح لك بتشغيله يدوياً للتجربة
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4
+
+      - name: Run Scraper
+        run: python scraper.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add gold_data.json
+          git commit -m "Update gold prices" || exit 0
+          git push
