@@ -4,28 +4,25 @@ from datetime import datetime
 
 def get_gold_data():
     try:
-        # سحب السعر العالمي للذهب (XAU/USD) 
-        # هذا الرابط يوفر بيانات حية دقيقة جداً
-        url = "https://api.investing.com/api/financialdata/assets/pair/68?field=last_value"
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(url, headers=headers, timeout=15)
+        # سحب سعر الذهب المباشر (Spot Gold) وهو الأدق لمحلات الصاغة
+        # سنستخدم API يوفر بيانات البورصة العالمية لحظياً
+        url = "https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT"
+        response = requests.get(url, timeout=15)
         
-        # استخراج السعر من النتيجة
-        gold_price_usd = float(response.json()['data'][0]['value'])
+        # السعر العالمي للأونصة
+        price_float = float(response.json()['price'])
         
-        # تجهيز البيانات النهائية
         data = {
-            "last_update": datetime.now().strftime("%Y-%m-%d %I:%M %p"),
-            "gold_price_usd": gold_price_usd,
-            "unit": "Ounce",
+            "last_update": datetime.now().strftime("%Y-%m-%d %I:%M:%S %p"),
+            "gold_price_usd": price_float,
+            "description": "Global Gold Spot Price (XAU/USD)",
             "status": "success"
         }
 
-        # حفظ الملف ليكون متاحاً كـ API
         with open('gold_data.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
         
-        print(f"Done! Current Gold Price: {gold_price_usd}")
+        print(f"Success! Current Price: {price_float}")
 
     except Exception as e:
         print(f"Error: {e}")
