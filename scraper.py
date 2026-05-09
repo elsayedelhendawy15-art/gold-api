@@ -2,28 +2,26 @@ import requests
 import json
 from datetime import datetime
 
-def get_live_data():
+def force_update():
     try:
-        # الرابط ده هو اللي بيجيب السعر الحقيقي
-        url = "https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT"
-        res = requests.get(url, timeout=15)
+        # سحب سعر الذهب المباشر
+        res = requests.get("https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT", timeout=15)
         price_usd = float(res.json()['price'])
         
-        # حساب سعر عيار 21 (بافتراض دولار الصاغة 49 حالياً)
-        # تقدر تغير الـ 49 دي لأي رقم انت عاوزه
-        price_21k = (price_usd / 31.1035) * 49.0 * 0.875
-
-        data = {
+        # دي البيانات الجديدة اللي هتظهر في الملف
+        new_data = {
             "last_update": datetime.now().strftime("%Y-%m-%d %I:%M %p"),
-            "price": round(price_21k, 0),
-            "global_usd": round(price_usd, 2)
+            "gold_price": round(price_usd, 2),
+            "egypt_21k": round((price_usd / 31.1035) * 49.0 * 0.875, 0),
+            "message": "SYSTEM_UPDATED_SUCCESSFULLY"
         }
 
+        # حفظ في الملف
         with open('gold_data.json', 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-        print("Success")
-    except:
-        print("Failed")
+            json.dump(new_data, f, ensure_ascii=False, indent=4)
+        print("Done!")
+    except Exception as e:
+        print(f"Failed: {e}")
 
 if __name__ == "__main__":
-    get_live_data()
+    force_update()
